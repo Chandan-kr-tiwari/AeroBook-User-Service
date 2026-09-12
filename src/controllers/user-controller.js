@@ -96,6 +96,26 @@ class UserController {
             });
         }
     }
+
+    async activateUser(req, res) {
+    try {
+        const user = await userService.activateUser(
+            req.params.id
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'Flight company approved successfully',
+            data: user
+        });
+
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
 }
 
 module.exports = new UserController();

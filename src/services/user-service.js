@@ -11,7 +11,8 @@ class UserService {
         this.roleRepository = new RoleRepository();
     }
 
-    async createUser(data) {
+    
+async createUser(data) {
     try {
         const { name, email, password, role } = data;
 
@@ -47,6 +48,7 @@ class UserService {
         // Flight companies require admin approval
         const isActive = role === 'CUSTOMER';
 
+        // Create user
         const user = await this.userRepository.create({
             name,
             email,
@@ -55,10 +57,17 @@ class UserService {
             isActive
         });
 
-        return user;
+        // Remove password from response
+        const userResponse = user.toJSON();
+
+        delete userResponse.password;
+
+        return userResponse;
 
     } catch (error) {
-        console.log(error.name);
+
+        console.log('ERROR NAME:', error.name);
+        console.log('ERROR MESSAGE:', error.message);
 
         if (
             error.name === 'SequelizeValidationError' ||
@@ -84,21 +93,28 @@ class UserService {
         );
     }
 }
-    async getUser(id) {
-        try {
-            return await this.userRepository.get(id);
-        } catch (error) {
-            if (error instanceof AppError) {
-                throw error;
-            }
 
-            throw new AppError(
-                'Cannot fetch user',
-                StatusCodes.INTERNAL_SERVER_ERROR
-            );
+
+   async getUser(id) {
+    try {
+        const user = await this.userRepository.get(id);
+
+        const userResponse = user.toJSON();
+        delete userResponse.password;
+
+        return userResponse;
+
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
         }
-    }
 
+        throw new AppError(
+            'Cannot fetch user',
+            StatusCodes.INTERNAL_SERVER_ERROR
+        );
+    }
+}
     async getAllUsers() {
         try {
             return await this.userRepository.getAll();
@@ -215,6 +231,50 @@ class UserService {
             );
         }
     }
+
+     async activateUser(id) {
+    try {
+        const user = await this.userRepository.get(id);
+
+        const role = await this.roleRepository.get(user.roleId);
+
+        if (role.name !== 'FLIGHT_COMPANY') {
+            throw new AppError(
+                'Only flight company accounts require approval',
+                StatusCodes.BAD_REQUEST
+            );
+        }
+
+        if (user.isActive) {
+            throw new AppError(
+                'User is already active',
+                StatusCodes.BAD_REQUEST
+            );
+        }
+
+        await this.userRepository.update(id, {
+            isActive: true
+        });
+
+        const updatedUser = await this.userRepository.get(id);
+
+        const response = updatedUser.toJSON();
+        delete response.password;
+
+        return response;
+
+    } catch (error) {
+
+        if (error instanceof AppError) {
+            throw error;
+        }
+
+        throw new AppError(
+            'Cannot activate user',
+            StatusCodes.INTERNAL_SERVER_ERROR
+        );
+    }
+}
 }
 
 module.exports = UserService;
