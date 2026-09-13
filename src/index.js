@@ -2,6 +2,9 @@ const express = require('express');
 
 const { ServerConfig, Logger } = require('./config');
 
+
+const {ConnectRabbitMq} = require('./events');
+
 const apiRoutes = require('./routes')
 
 const app = express();
@@ -19,7 +22,7 @@ app.get('/', (req, res) => {
 
 const startServer = async () => {
     try {
-
+         await ConnectRabbitMq();
         const server = app.listen(ServerConfig.PORT, () => {
             Logger.info(
                 `Successfully started the server on PORT: ${ServerConfig.PORT}`

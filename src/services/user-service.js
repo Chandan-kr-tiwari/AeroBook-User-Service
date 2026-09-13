@@ -1,5 +1,6 @@
 const UserRepository = require('../repositories/user-repository');
 const RoleRepository = require('../repositories/role-repository');
+const {PublishEvent} =require('../events')
 
 const { StatusCodes } = require('http-status-codes');
 const AppError = require('../utils/errors/app-error');
@@ -57,12 +58,20 @@ async createUser(data) {
             isActive
         });
 
+            await PublishEvent('user.registered', {
+            userId: user.id,
+            name: user.name,
+            email: user.email
+    });
+
         // Remove password from response
         const userResponse = user.toJSON();
 
         delete userResponse.password;
 
         return userResponse;
+
+         
 
     } catch (error) {
 
