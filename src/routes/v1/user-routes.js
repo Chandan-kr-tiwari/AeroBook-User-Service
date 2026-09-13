@@ -50,4 +50,9 @@ router.delete(
     UserController.deleteUser
 );
 
+router.get(
+    '/internal/:id',
+    UserController.getUser
+);
+
 module.exports = router;
