@@ -22,6 +22,24 @@ class AuthController {
             });
         }
     }
+
+   async logout(req, res) {
+    try {
+        const response = await authService.logout(req.user);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Logout successful',
+            data: response
+        });
+
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
 }
 
 module.exports = new AuthController();

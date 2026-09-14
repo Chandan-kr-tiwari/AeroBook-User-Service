@@ -79,7 +79,14 @@ class AuthService {
             );
         }
     }
+
+     async logout(user) {
+        return {
+            userId: user.id
+        };
+    }
 }
+
 
 module.exports = AuthService;
 
