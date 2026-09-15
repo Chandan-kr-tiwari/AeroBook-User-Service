@@ -11,7 +11,7 @@ module.exports = {
                 name: 'Admin',
                 email: 'admin@aerobook.com',
                 password,
-                roleId: 10, // ADMIN role ID
+                roleId: 1, // ADMIN role ID
                 isActive: true,
                 createdAt: new Date(),
                 updatedAt: new Date()
